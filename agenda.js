@@ -8,10 +8,6 @@ const mensagem = document.getElementById("mensagem");
 const lista = document.getElementById("lista");
 const aviso = document.getElementById("aviso");
 
-// O localStorage nem sempre esta disponivel: abrindo o arquivo direto do disco
-// (file://), em aba anonima, ou com o navegador bloqueando dados de site, o
-// acesso lanca excecao. Quando isso acontece a agenda continua funcionando na
-// memoria; so nao guarda ao fechar a pagina.
 let memoria = [];
 let temArmazenamento = true;
 
@@ -47,6 +43,17 @@ function horarioOcupado(consultas, nova) {
   );
 }
 
+function gerarId() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function cancelarConsulta(id) {
+  const consultas = carregar().filter((c) => c.id !== id);
+  salvar(consultas);
+  mensagem.textContent = "Consulta cancelada.";
+  renderizar();
+}
+
 function renderizar() {
   const consultas = carregar().sort((a, b) =>
     (a.data + a.hora).localeCompare(b.data + b.hora)
@@ -55,21 +62,30 @@ function renderizar() {
   lista.innerHTML = "";
 
   if (consultas.length === 0) {
-    lista.innerHTML = '<tr><td colspan="4" class="vazio">Nenhuma consulta agendada.</td></tr>';
+    lista.innerHTML = '<tr><td colspan="5" class="vazio">Nenhuma consulta agendada.</td></tr>';
     return;
   }
 
   for (const c of consultas) {
     const linha = document.createElement("tr");
-    linha.innerHTML = `<td>${c.data}</td><td>${c.hora}</td><td>${c.profissional}</td><td>${c.paciente}</td>`;
+    linha.innerHTML = `<td>${c.data}</td><td>${c.hora}</td><td>${c.profissional}</td><td>${c.paciente}</td><td><button type="button" class="cancelar" data-id="${c.id}">Cancelar</button></td>`;
     lista.appendChild(linha);
   }
+
+  lista.querySelectorAll(".cancelar").forEach((botao) => {
+    botao.addEventListener("click", () => {
+      if (confirm("Cancelar esta consulta?")) {
+        cancelarConsulta(botao.dataset.id);
+      }
+    });
+  });
 }
 
 formulario.addEventListener("submit", (evento) => {
   evento.preventDefault();
 
   const nova = {
+    id: gerarId(),
     paciente: document.getElementById("paciente").value.trim(),
     profissional: document.getElementById("profissional").value,
     data: document.getElementById("data").value,
@@ -80,7 +96,7 @@ formulario.addEventListener("submit", (evento) => {
 
   if (horarioOcupado(consultas, nova)) {
     mensagem.textContent = `Horário ocupado: ${nova.profissional} já tem consulta em ${nova.data} às ${nova.hora}.`;
-    return; 
+    return;
   }
 
   consultas.push(nova);

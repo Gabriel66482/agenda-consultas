@@ -16,6 +16,8 @@
     table { width: 100%; border-collapse: collapse; }
     th, td { text-align: left; padding: .4rem; border-bottom: 1px solid #ddd; }
     .vazio { color: #777; font-style: italic; }
+    .cancelar { grid-column: auto; padding: .25rem .6rem; font-size: .85rem; background: #fdecea; border: 1px solid #e6a29a; border-radius: 4px; cursor: pointer; }
+    .cancelar:hover { background: #f8d3ce; }
   </style>
 </head>
 <body>
@@ -51,7 +53,7 @@
 
   <table>
     <thead>
-      <tr><th>Data</th><th>Horário</th><th>Profissional</th><th>Paciente</th></tr>
+      <tr><th>Data</th><th>Horário</th><th>Profissional</th><th>Paciente</th><th>Ação</th></tr>
     </thead>
     <tbody id="lista"></tbody>
   </table>
